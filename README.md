@@ -1,11 +1,71 @@
-<div align="center">
+# 光影台账 (Video Asset Hub)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+视频素材管理与数据洞察平台。通过提供高度可定制的检索方案、流畅的浏览体验以及直观的数据统计视图，帮助业务人员快速定位目标素材，并从宏观角度掌握素材大盘的运作健康度。
 
-  <h1>Built with AI Studio</h2>
+## 🛠 技术选型说明
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+本项目采用现代化的前端技术栈构建，注重开发效率、运行性能和代码可维护性：
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- **核心框架**: [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+  - 采用函数式组件与 Hooks 模式，结合 TypeScript 提供严格的类型检查，降低运行时错误率。
+- **构建工具**: [Vite](https://vitejs.dev/)
+  - 提供极速的冷启动和开箱即用的 HMR（模块热替换），大幅提升开发体验。
+- **状态管理**: [Zustand](https://zustand-demo.pmnd.rs/)
+  - 轻量级、无样板代码的全局状态管理。结合 `persist` 中间件实现了用户偏好（如素材字段显示设置）的本地持久化，以及全局搜索状态的跨组件共享。
+- **样式方案**: [Tailwind CSS](https://tailwindcss.com/)
+  - 原子化 CSS 框架，配合 CSS Variables 实现灵活的主题定制、暗色模式扩展和响应式布局。
+- **图标与UI辅助**: 
+  - [Lucide React](https://lucide.dev/): 提供风格统一、清晰的矢量图标。
+  - `clsx`: 优雅地处理条件类名拼接。
+  - `date-fns`: 轻量级的日期时间格式化工具。
 
-</div>
+## 🚀 本地启动步骤
+
+请确保您的本地环境已安装 [Node.js](https://nodejs.org/) (推荐 v18+)。
+
+1. **获取代码并进入项目目录**
+   ```bash
+   # 如果您从代码库克隆
+   git clone <repository-url>
+   cd video-asset-hub
+   ```
+
+2. **安装依赖**
+   ```bash
+   npm install
+   ```
+
+3. **启动开发服务器**
+   ```bash
+   npm run dev
+   ```
+   启动成功后，终端会输出本地访问地址（通常为 `http://localhost:3000` 或 `http://localhost:5173`），在浏览器中打开该地址即可预览。
+
+4. **构建生产版本**
+   ```bash
+   npm run build
+   ```
+   构建产物将输出到 `dist` 目录，可用于部署到静态服务器或 CDN。
+
+## 🧪 测试运行方式
+
+项目内置了代码规范检查与基础测试脚本，以保证代码质量：
+
+1. **静态代码检查 (Linting)**
+   运行 ESLint 和 TypeScript 类型检查，排查潜在的语法和类型错误：
+   ```bash
+   npm run lint
+   ```
+
+2. **运行单元测试**
+   *(注：若项目后续集成了 Vitest 或 Jest，可通过以下命令执行测试用例)*
+   ```bash
+   npm run test
+   ```
+
+3. **核心业务流程自测指南 (手动测试)**
+   在本地启动后，建议按照以下流程进行功能验证：
+   - **全局搜索与过滤**: 在顶部导航栏搜索框输入关键字（如“航拍”、“陈志明”），验证素材列表是否实时精准过滤。
+   - **视图模式切换**: 点击列表右上角的视图切换按钮，验证“卡片视图”与“表格视图”的无缝切换及响应式布局。
+   - **视频预览播放**: 点击任意素材卡片呼出详情抽屉，点击封面图中央的播放按钮，验证 HTML5 视频播放器是否正常加载并自动播放。
+   - **状态持久化**: 在详情抽屉的“字段选择器”中更改显示偏好，刷新页面，验证您的配置是否被浏览器 `localStorage` 成功保留。

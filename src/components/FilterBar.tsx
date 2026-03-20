@@ -1,0 +1,56 @@
+import React from 'react';
+import { Select, Input } from 'antd';
+
+export interface FilterSchemaItem {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  type: 'select' | 'input' | 'radio' | 'tags';
+  options?: Array<{ label: string; value: string | number }>;
+  placeholder?: string;
+}
+
+export interface FilterBarProps {
+  schema: FilterSchemaItem[];
+  value: Record<string, any>;
+  onChange: (val: Record<string, any>) => void;
+  onReset: () => void;
+}
+
+export const FilterBar: React.FC<FilterBarProps> = ({ schema, value, onChange }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+      {schema.map((item) => (
+        <div key={item.key} className="space-y-2">
+          <label className="text-xs font-bold text-on-surface-variant flex items-center gap-1">
+            {item.icon}
+            {item.label}
+          </label>
+          {item.type === 'select' && (
+            <Select
+              className="w-full"
+              placeholder={item.placeholder}
+              options={item.options}
+              value={value[item.key]}
+              onChange={(val) => onChange({ ...value, [item.key]: val })}
+              allowClear
+              size="large"
+              variant="borderless"
+              style={{ backgroundColor: 'var(--color-surface-container-low)', borderRadius: '0.5rem' }}
+            />
+          )}
+          {item.type === 'input' && (
+            <Input
+              placeholder={item.placeholder}
+              value={value[item.key]}
+              onChange={(e) => onChange({ ...value, [item.key]: e.target.value })}
+              size="large"
+              variant="borderless"
+              style={{ backgroundColor: 'var(--color-surface-container-low)', borderRadius: '0.5rem' }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
