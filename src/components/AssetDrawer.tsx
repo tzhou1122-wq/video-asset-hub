@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Share2, MoreVertical, Play, SlidersHorizontal, History, CloudCheck } from 'lucide-react';
 import { VideoAsset } from '../mock/data';
 import { useAppStore, FieldPreferences } from '../store';
@@ -15,6 +15,19 @@ interface AssetDrawerProps {
 export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClose }) => {
   const { fieldPreferences, toggleFieldPreference } = useAppStore();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!visible) {
@@ -43,6 +56,56 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
             <button className="p-2 hover:bg-surface-container-high rounded-lg text-primary transition-all">
               <Share2 className="w-5 h-5" />
             </button>
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={clsx(
+                  "p-2 rounded-lg transition-all flex items-center gap-1",
+                  isDropdownOpen ? "bg-primary/10 text-primary" : "hover:bg-surface-container-high text-primary"
+                )}
+                title="字段配置"
+              >
+                <SlidersHorizontal className="w-5 h-5" />
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute top-[calc(100%+8px)] right-0 w-64 p-4 bg-white rounded-xl shadow-xl border border-outline-variant/10 z-[80] animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold text-on-surface">展示字段设置</h3>
+                    <button onClick={() => setIsDropdownOpen(false)} className="text-on-surface-variant hover:text-on-surface">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-on-surface-variant mb-4 leading-relaxed">自定义在全局库视图中展示的元数据字段。</p>
+                  <div className="flex flex-col gap-3">
+                    {(Object.keys(fieldPreferences) as Array<keyof FieldPreferences>).map((key) => {
+                      const labels: Record<keyof FieldPreferences, string> = {
+                        title: '标题',
+                        uploader: '上传人',
+                        city: '城市',
+                        tags: '标签',
+                        duration: '时长',
+                        uploadTime: '上传时间',
+                        fileSize: '文件大小'
+                      };
+                      return (
+                        <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={fieldPreferences[key]}
+                            onChange={() => toggleFieldPreference(key)}
+                            className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20 cursor-pointer"
+                          />
+                          <span className="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">
+                            {labels[key]}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
             <button className="p-2 hover:bg-surface-container-high rounded-lg text-primary transition-all">
               <MoreVertical className="w-5 h-5" />
             </button>
@@ -143,41 +206,6 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
                   <span className="col-span-2 text-on-surface text-body-sm font-semibold">{formatBytes(asset.fileSize)}</span>
                 </div>
               )}
-            </div>
-          </section>
-
-          {/* Field Selector */}
-          <section className="bg-surface-container-low/50 p-5 rounded-xl border border-outline-variant/5">
-            <div className="flex items-center gap-2 mb-4">
-              <SlidersHorizontal className="text-primary w-5 h-5" />
-              <h3 className="text-sm font-bold text-on-surface">字段选择器</h3>
-            </div>
-            <p className="text-[11px] text-on-surface-variant mb-4 leading-relaxed">自定义在全局库视图中展示的元数据字段。</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.keys(fieldPreferences) as Array<keyof FieldPreferences>).map((key) => {
-                const labels: Record<keyof FieldPreferences, string> = {
-                  title: '标题',
-                  uploader: '上传人',
-                  city: '城市',
-                  tags: '标签',
-                  duration: '时长',
-                  uploadTime: '上传时间',
-                  fileSize: '文件大小'
-                };
-                return (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={fieldPreferences[key]}
-                      onChange={() => toggleFieldPreference(key)}
-                      className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20 cursor-pointer"
-                    />
-                    <span className="text-xs font-medium text-on-surface group-hover:text-primary transition-colors">
-                      {labels[key]}
-                    </span>
-                  </label>
-                );
-              })}
             </div>
           </section>
 

@@ -22,7 +22,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ schema, value, onChange })
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
       {schema.map((item) => (
         <div key={item.key} className="space-y-2">
-          <label className="text-xs font-bold text-on-surface-variant flex items-center gap-1">
+          <label className="text-[13px] font-bold text-gray-500 flex items-center gap-1">
             {item.icon}
             {item.label}
           </label>

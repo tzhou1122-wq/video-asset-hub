@@ -11,7 +11,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       {/* TopNavBar */}
       <header className="w-full h-16 sticky top-0 z-50 bg-white border-b border-slate-100 flex items-center justify-between px-6 shadow-sm">
         <div className="flex items-center gap-8">
-          <span className="text-xl font-bold text-slate-900 tracking-tight">光影台账</span>
+          <span className="text-xl font-bold text-slate-900 tracking-tight">光影中心</span>
           <nav className="hidden md:flex items-center gap-6">
             <button
               onClick={() => setActiveTab('assets')}
