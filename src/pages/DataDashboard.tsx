@@ -17,9 +17,9 @@ export const DataDashboard: React.FC = () => {
         },
         labelLine: { show: false },
         data: [
-          { value: 65, name: '已通过', itemStyle: { color: 'var(--color-primary)' } },
-          { value: 25, name: '待审核', itemStyle: { color: 'var(--color-tertiary-fixed)' } },
-          { value: 10, name: '已驳回', itemStyle: { color: 'var(--color-error-container)' } }
+          { value: 65, name: '已通过', itemStyle: { color: '#3b82f6' } },
+          { value: 25, name: '待审核', itemStyle: { color: '#f59e0b' } },
+          { value: 10, name: '已驳回', itemStyle: { color: '#ef4444' } }
         ]
       }
     ]
@@ -65,15 +65,15 @@ export const DataDashboard: React.FC = () => {
         name: '素材数量',
         type: 'bar',
         barWidth: '40%',
-        itemStyle: { color: 'var(--color-primary-fixed-dim)', borderRadius: [4, 4, 0, 0] },
-        emphasis: { itemStyle: { color: 'var(--color-primary)' } },
+        itemStyle: { color: '#60a5fa', borderRadius: [4, 4, 0, 0] },
+        emphasis: { itemStyle: { color: '#3b82f6' } },
         data: [700, 450, 820, 580]
       },
       {
         name: '平均大小(GB)',
         type: 'line',
         yAxisIndex: 1,
-        itemStyle: { color: 'var(--color-tertiary)' },
+        itemStyle: { color: '#f59e0b' },
         symbolSize: 8,
         data: [9.5, 6.2, 4.1, 10.8]
       }
@@ -100,14 +100,14 @@ export const DataDashboard: React.FC = () => {
         type: 'line',
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 3, color: 'var(--color-primary-container)' },
+        lineStyle: { width: 3, color: '#3b82f6' },
         areaStyle: {
           color: {
             type: 'linear',
             x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(0, 110, 242, 0.15)' },
-              { offset: 1, color: 'rgba(0, 110, 242, 0)' }
+              { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
+              { offset: 1, color: 'rgba(59, 130, 246, 0)' }
             ]
           }
         },
@@ -124,7 +124,7 @@ export const DataDashboard: React.FC = () => {
           <p className="text-on-surface-variant text-sm">实时素材分布与运营效率指标。</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex items-center justify-between group hover:bg-primary-fixed/30 transition-colors duration-300">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-primary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">素材总量</p>
               <h3 className="text-2xl font-bold text-on-surface">12,842</h3>
@@ -136,7 +136,7 @@ export const DataDashboard: React.FC = () => {
               <Video className="w-6 h-6" />
             </div>
           </div>
-          <div className="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex items-center justify-between group hover:bg-tertiary-fixed/30 transition-colors duration-300">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-tertiary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">待审核素材</p>
               <h3 className="text-2xl font-bold text-on-surface">148</h3>
@@ -148,7 +148,7 @@ export const DataDashboard: React.FC = () => {
               <CheckCircle2 className="w-6 h-6" />
             </div>
           </div>
-          <div className="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex items-center justify-between group hover:bg-secondary-fixed/30 transition-colors duration-300">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-secondary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">今日新增上传</p>
               <h3 className="text-2xl font-bold text-on-surface">84</h3>
@@ -164,7 +164,7 @@ export const DataDashboard: React.FC = () => {
       </section>
 
       <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 lg:col-span-4 bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+        <div className="col-span-12 lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between mb-8">
             <h4 className="font-bold text-on-surface">审核状态分布</h4>
             <MoreHorizontal className="text-outline cursor-pointer hover:text-on-surface" />
@@ -179,21 +179,21 @@ export const DataDashboard: React.FC = () => {
           <div className="mt-6 space-y-3">
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-primary"></span>
+                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
                 <span className="text-on-surface-variant">已通过</span>
               </div>
               <span className="font-bold">65%</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-tertiary-fixed"></span>
+                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
                 <span className="text-on-surface-variant">待审核</span>
               </div>
               <span className="font-bold">25%</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-error-container"></span>
+                <span className="w-3 h-3 rounded-full bg-red-500"></span>
                 <span className="text-on-surface-variant">已驳回</span>
               </div>
               <span className="font-bold">10%</span>
@@ -201,7 +201,7 @@ export const DataDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-8 bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+        <div className="col-span-12 lg:col-span-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h4 className="font-bold text-on-surface">区域素材密度</h4>
@@ -217,7 +217,7 @@ export const DataDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="col-span-12 bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+        <div className="col-span-12 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
             <div>
               <h4 className="text-lg font-bold text-on-surface">素材上传趋势 (近7天)</h4>

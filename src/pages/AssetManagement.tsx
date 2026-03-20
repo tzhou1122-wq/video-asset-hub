@@ -4,6 +4,7 @@ import { AssetDrawer } from '../components/AssetDrawer';
 import { mockAssets, VideoAsset } from '../mock/data';
 import { User, CheckCircle, Tag, MapPin, LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppStore } from '../store';
+import { formatBytes, formatDuration } from '../utils/format';
 import clsx from 'clsx';
 
 const filterSchema: FilterSchemaItem[] = [
@@ -59,20 +60,6 @@ const filterSchema: FilterSchemaItem[] = [
     ],
   },
 ];
-
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
-
-const formatDuration = (seconds: number) => {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-};
 
 export const AssetManagement: React.FC = () => {
   const { searchQuery } = useAppStore();
@@ -132,7 +119,7 @@ export const AssetManagement: React.FC = () => {
         <p className="text-on-surface-variant max-w-2xl">管理、组织并监控您全球制作流水线中的高保真电影素材。</p>
       </div>
 
-      <section className="bg-surface-container-lowest rounded-xl p-6 mb-8 shadow-sm">
+      <section className="bg-white rounded-xl p-6 mb-8 shadow-sm border border-slate-200">
         <FilterBar
           schema={filterSchema}
           value={filterValues}
@@ -192,7 +179,7 @@ export const AssetManagement: React.FC = () => {
             <div
               key={asset.id}
               onClick={() => setSelectedAsset(asset)}
-              className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+              className="group bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
             >
               <div className="relative aspect-video bg-slate-200 overflow-hidden">
                 <img src={asset.thumbnailUrl} alt={asset.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -225,7 +212,7 @@ export const AssetManagement: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-10 border border-slate-50">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-10 border border-slate-200">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100 text-xs text-slate-500 uppercase tracking-wider">
@@ -267,7 +254,7 @@ export const AssetManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between bg-surface-container-lowest px-6 py-4 rounded-xl shadow-sm border border-slate-50">
+      <div className="flex items-center justify-between bg-white px-6 py-4 rounded-xl shadow-sm border border-slate-200">
         <div className="text-xs text-on-surface-variant font-medium">
           第 {filteredAssets.length === 0 ? 0 : startIndex + 1} 到 {endIndex} 条，共 {filteredAssets.length} 条素材
         </div>

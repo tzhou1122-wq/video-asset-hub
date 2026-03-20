@@ -64,7 +64,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
       <div className="flex flex-1">
         {/* SideNavBar */}
-        <aside className="w-64 fixed left-0 top-16 bottom-0 bg-slate-50 flex flex-col py-4 border-r border-slate-100 z-40 overflow-y-auto">
+        <aside className="w-64 fixed left-0 top-16 bottom-0 bg-white flex flex-col py-4 border-r border-slate-200 z-40 overflow-y-auto">
           <div className="px-4 mb-6">
             <button className="w-full bg-gradient-to-r from-primary to-primary-container text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 shadow-md hover:opacity-90 active:scale-95 transition-all">
               <Upload className="w-5 h-5" />
@@ -77,7 +77,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               onClick={() => setActiveTab('assets')}
               className={clsx(
                 "w-full flex items-center gap-3 px-4 py-3 mx-2 rounded-lg font-medium transition-all",
-                activeTab === 'assets' ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-200/50"
+                activeTab === 'assets' ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"
               )}
             >
               <Video className="w-5 h-5" />
@@ -87,7 +87,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               onClick={() => setActiveTab('dashboard')}
               className={clsx(
                 "w-full flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all",
-                activeTab === 'dashboard' ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-200/50"
+                activeTab === 'dashboard' ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"
               )}
             >
               <BarChart2 className="w-5 h-5" />
@@ -95,11 +95,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </button>
             <div className="px-6 py-4 mt-4 border-t border-slate-200/60">
               <div className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">管理</div>
-              <button className="w-full text-slate-600 hover:bg-slate-200/50 flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all">
+              <button className="w-full text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all">
                 <HelpCircle className="w-5 h-5" />
                 帮助
               </button>
-              <button className="w-full text-slate-600 hover:bg-slate-200/50 flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all">
+              <button className="w-full text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all">
                 <Archive className="w-5 h-5" />
                 归档
               </button>
@@ -108,7 +108,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </aside>
 
         {/* Main Content Canvas */}
-        <main className="ml-64 flex-1 p-8 bg-surface min-h-[calc(100vh-64px)]">
+        <main className="ml-64 flex-1 p-8 bg-slate-50 min-h-[calc(100vh-64px)]">
           {children}
         </main>
       </div>

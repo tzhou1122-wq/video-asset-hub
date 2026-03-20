@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Share2, MoreVertical, Play, SlidersHorizontal, History, CloudCheck } from 'lucide-react';
 import { VideoAsset } from '../mock/data';
 import { useAppStore, FieldPreferences } from '../store';
+import { formatBytes, formatDuration } from '../utils/format';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 
@@ -10,20 +11,6 @@ interface AssetDrawerProps {
   asset: VideoAsset | null;
   onClose: () => void;
 }
-
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
-
-const formatDuration = (seconds: number) => {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-};
 
 export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClose }) => {
   const { fieldPreferences, toggleFieldPreference } = useAppStore();
