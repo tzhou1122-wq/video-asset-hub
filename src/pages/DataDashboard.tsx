@@ -71,7 +71,7 @@ export const DataDashboard: React.FC = () => {
       trendValues,
       totalSizeGB
     };
-  }, []);
+  }, [assets]);
 
   const statusOption = {
     tooltip: { trigger: 'item' },
