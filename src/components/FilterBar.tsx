@@ -18,9 +18,44 @@ export interface FilterBarProps {
 }
 
 /**
+ * 渲染策略映射
+ * 将不同的过滤类型映射到对应的渲染函数。
+ * 便于扩展新类型（如日期范围、滑块等）而无需修改主逻辑。
+ */
+const RENDER_STRATEGY: Record<
+  FilterSchemaItem['type'],
+  (item: FilterSchemaItem, value: any, onChange: (val: any) => void) => React.ReactNode
+> = {
+  select: (item, value, onChange) => (
+    <Select
+      className="w-full"
+      placeholder={item.placeholder}
+      options={item.options}
+      value={value}
+      onChange={onChange}
+      allowClear
+      size="large"
+      variant="borderless"
+      style={{ backgroundColor: 'var(--color-surface-container-low)', borderRadius: '0.5rem' }}
+    />
+  ),
+  input: (item, value, onChange) => (
+    <Input
+      placeholder={item.placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      size="large"
+      variant="borderless"
+      style={{ backgroundColor: 'var(--color-surface-container-low)', borderRadius: '0.5rem' }}
+    />
+  ),
+  radio: () => null, // 待实现
+  tags: () => null,  // 待实现
+};
+
+/**
  * 过滤栏组件 (配置驱动)
- * 根据传入的 schema 动态渲染过滤控件（下拉框、输入框等）。
- * 这种设计模式使得新增过滤项只需修改配置，无需改动组件代码。
+ * 使用策略模式分发渲染逻辑，符合开闭原则。
  */
 export const FilterBar: React.FC<FilterBarProps> = ({ schema, value, onChange }) => {
   return (
@@ -33,29 +68,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({ schema, value, onChange })
             {item.label}
           </label>
           
-          {/* 根据类型渲染对应的 Ant Design 控件 */}
-          {item.type === 'select' && (
-            <Select
-              className="w-full"
-              placeholder={item.placeholder}
-              options={item.options}
-              value={value[item.key]}
-              onChange={(val) => onChange({ ...value, [item.key]: val })}
-              allowClear
-              size="large"
-              variant="borderless"
-              style={{ backgroundColor: 'var(--color-surface-container-low)', borderRadius: '0.5rem' }}
-            />
-          )}
-          {item.type === 'input' && (
-            <Input
-              placeholder={item.placeholder}
-              value={value[item.key]}
-              onChange={(e) => onChange({ ...value, [item.key]: e.target.value })}
-              size="large"
-              variant="borderless"
-              style={{ backgroundColor: 'var(--color-surface-container-low)', borderRadius: '0.5rem' }}
-            />
+          {/* 使用策略模式进行渲染 */}
+          {RENDER_STRATEGY[item.type]?.(
+            item, 
+            value[item.key], 
+            (val) => onChange({ ...value, [item.key]: val })
           )}
         </div>
       ))}

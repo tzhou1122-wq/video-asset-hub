@@ -1,8 +1,78 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { TrendingUp, Clock, CheckCircle2, MoreHorizontal, Database, Gauge, Users, ArrowDown, Video, Upload } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle2, MoreHorizontal, Database, Gauge, Users, ArrowDown, Video, Upload, Loader2 } from 'lucide-react';
+import { useAppStore } from '../store';
+import { format } from 'date-fns';
 
 export const DataDashboard: React.FC = () => {
+  const { assets, fetchAssets, isLoading } = useAppStore();
+
+  // 初始化加载素材
+  useEffect(() => {
+    if (assets.length === 0) {
+      fetchAssets();
+    }
+  }, [assets.length, fetchAssets]);
+
+  const stats = useMemo(() => {
+    const total = assets.length;
+    const pending = assets.filter(a => a.status === 'pending').length;
+    const approved = assets.filter(a => a.status === 'approved').length;
+    const rejected = assets.filter(a => a.status === 'rejected').length;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayUploads = assets.filter(a => new Date(a.uploadTime) >= today).length;
+
+    // City distribution
+    const cityMap: Record<string, { count: number, totalSize: number }> = {};
+    assets.forEach(a => {
+      if (!cityMap[a.city]) cityMap[a.city] = { count: 0, totalSize: 0 };
+      cityMap[a.city].count++;
+      cityMap[a.city].totalSize += a.fileSize;
+    });
+
+    const cities = Object.keys(cityMap);
+    const cityCounts = cities.map(c => cityMap[c].count);
+    const cityAvgSizes = cities.map(c => (cityMap[c].totalSize / cityMap[c].count / (1024 * 1024 * 1024)).toFixed(2));
+
+    // Trend (Last 7 days)
+    const trendData: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = format(d, 'MM-dd');
+      trendData[dateStr] = 0;
+    }
+
+    assets.forEach(a => {
+      const dateStr = format(new Date(a.uploadTime), 'MM-dd');
+      if (trendData[dateStr] !== undefined) {
+        trendData[dateStr]++;
+      }
+    });
+
+    const trendLabels = Object.keys(trendData);
+    const trendValues = Object.values(trendData);
+
+    // Total storage
+    const totalSizeGB = assets.reduce((acc, a) => acc + a.fileSize, 0) / (1024 * 1024 * 1024);
+
+    return {
+      total,
+      pending,
+      approved,
+      rejected,
+      todayUploads,
+      cities,
+      cityCounts,
+      cityAvgSizes,
+      trendLabels,
+      trendValues,
+      totalSizeGB
+    };
+  }, []);
+
   const statusOption = {
     tooltip: { trigger: 'item' },
     series: [
@@ -13,13 +83,13 @@ export const DataDashboard: React.FC = () => {
         avoidLabelOverlap: false,
         label: { show: false, position: 'center' },
         emphasis: {
-          label: { show: true, fontSize: 20, fontWeight: 'bold' }
+          label: { show: false }
         },
         labelLine: { show: false },
         data: [
-          { value: 65, name: '已通过', itemStyle: { color: '#3b82f6' } },
-          { value: 25, name: '待审核', itemStyle: { color: '#f59e0b' } },
-          { value: 10, name: '已驳回', itemStyle: { color: '#ef4444' } }
+          { value: stats.approved, name: '已通过', itemStyle: { color: '#3b82f6' } },
+          { value: stats.pending, name: '待审核', itemStyle: { color: '#f59e0b' } },
+          { value: stats.rejected, name: '已驳回', itemStyle: { color: '#ef4444' } }
         ]
       }
     ]
@@ -34,7 +104,7 @@ export const DataDashboard: React.FC = () => {
     xAxis: [
       {
         type: 'category',
-        data: ['上海', '北京', '杭州', '深圳'],
+        data: stats.cities,
         axisPointer: { type: 'shadow' },
         axisLine: { show: false },
         axisTick: { show: false }
@@ -45,8 +115,6 @@ export const DataDashboard: React.FC = () => {
         type: 'value',
         name: '数量',
         min: 0,
-        max: 1000,
-        interval: 250,
         axisLabel: { formatter: '{value}' },
         splitLine: { lineStyle: { type: 'dashed', color: '#e8e8e8' } }
       },
@@ -54,8 +122,6 @@ export const DataDashboard: React.FC = () => {
         type: 'value',
         name: 'GB',
         min: 0,
-        max: 12,
-        interval: 3,
         axisLabel: { formatter: '{value}' },
         splitLine: { show: false }
       }
@@ -67,7 +133,7 @@ export const DataDashboard: React.FC = () => {
         barWidth: '40%',
         itemStyle: { color: '#60a5fa', borderRadius: [4, 4, 0, 0] },
         emphasis: { itemStyle: { color: '#3b82f6' } },
-        data: [700, 450, 820, 580]
+        data: stats.cityCounts
       },
       {
         name: '平均大小(GB)',
@@ -75,7 +141,7 @@ export const DataDashboard: React.FC = () => {
         yAxisIndex: 1,
         itemStyle: { color: '#f59e0b' },
         symbolSize: 8,
-        data: [9.5, 6.2, 4.1, 10.8]
+        data: stats.cityAvgSizes
       }
     ]
   };
@@ -86,7 +152,7 @@ export const DataDashboard: React.FC = () => {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      data: stats.trendLabels,
       axisLine: { show: false },
       axisTick: { show: false }
     },
@@ -111,7 +177,7 @@ export const DataDashboard: React.FC = () => {
             ]
           }
         },
-        data: [120, 230, 150, 320, 180, 350, 210]
+        data: stats.trendValues
       }
     ]
   };
@@ -127,7 +193,7 @@ export const DataDashboard: React.FC = () => {
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-primary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">素材总量</p>
-              <h3 className="text-2xl font-bold text-on-surface">12,842</h3>
+              <h3 className="text-2xl font-bold text-on-surface">{stats.total.toLocaleString()}</h3>
               <p className="text-xs text-primary font-medium mt-1 flex items-center gap-1">
                 <TrendingUp className="w-4 h-4" /> 较上月 +14%
               </p>
@@ -139,9 +205,9 @@ export const DataDashboard: React.FC = () => {
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-tertiary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">待审核素材</p>
-              <h3 className="text-2xl font-bold text-on-surface">148</h3>
+              <h3 className="text-2xl font-bold text-on-surface">{stats.pending}</h3>
               <p className="text-xs text-tertiary font-medium mt-1 flex items-center gap-1">
-                <Clock className="w-4 h-4" /> 优先级队列: 24
+                <Clock className="w-4 h-4" /> 优先级队列: {Math.floor(stats.pending * 0.2)}
               </p>
             </div>
             <div className="h-12 w-12 bg-tertiary-fixed flex items-center justify-center rounded-lg text-tertiary">
@@ -151,9 +217,9 @@ export const DataDashboard: React.FC = () => {
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-secondary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">今日新增上传</p>
-              <h3 className="text-2xl font-bold text-on-surface">84</h3>
+              <h3 className="text-2xl font-bold text-on-surface">{stats.todayUploads}</h3>
               <p className="text-xs text-secondary font-medium mt-1 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4" /> 通过率 92%
+                <CheckCircle2 className="w-4 h-4" /> 通过率 {Math.round((stats.approved / (stats.approved + stats.rejected)) * 100)}%
               </p>
             </div>
             <div className="h-12 w-12 bg-secondary-fixed flex items-center justify-center rounded-lg text-secondary">
@@ -164,7 +230,17 @@ export const DataDashboard: React.FC = () => {
       </section>
 
       <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        {isLoading && (
+          <div className="col-span-12 flex items-center justify-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <p className="text-sm font-bold text-on-surface animate-pulse">正在同步全球素材库...</p>
+            </div>
+          </div>
+        )}
+        {!isLoading && (
+          <>
+            <div className="col-span-12 lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between mb-8">
             <h4 className="font-bold text-on-surface">审核状态分布</h4>
             <MoreHorizontal className="text-outline cursor-pointer hover:text-on-surface" />
@@ -172,7 +248,7 @@ export const DataDashboard: React.FC = () => {
           <div className="relative h-64">
             <ReactECharts option={statusOption} style={{ height: '100%', width: '100%' }} />
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-3xl font-black text-on-surface">85%</span>
+              <span className="text-3xl font-black text-on-surface">{Math.round((stats.approved / stats.total) * 100)}%</span>
               <span className="text-[10px] text-outline uppercase tracking-tighter">健康</span>
             </div>
           </div>
@@ -182,21 +258,21 @@ export const DataDashboard: React.FC = () => {
                 <span className="w-3 h-3 rounded-full bg-blue-500"></span>
                 <span className="text-on-surface-variant">已通过</span>
               </div>
-              <span className="font-bold">65%</span>
+              <span className="font-bold">{Math.round((stats.approved / stats.total) * 100)}%</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-amber-500"></span>
                 <span className="text-on-surface-variant">待审核</span>
               </div>
-              <span className="font-bold">25%</span>
+              <span className="font-bold">{Math.round((stats.pending / stats.total) * 100)}%</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-red-500"></span>
                 <span className="text-on-surface-variant">已驳回</span>
               </div>
-              <span className="font-bold">10%</span>
+              <span className="font-bold">{Math.round((stats.rejected / stats.total) * 100)}%</span>
             </div>
           </div>
         </div>
@@ -248,12 +324,12 @@ export const DataDashboard: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-xs mb-1">
                 <span className="text-on-surface-variant">已用容量</span>
-                <span className="font-bold">78%</span>
+                <span className="font-bold">{Math.round((stats.totalSizeGB / 100) * 100)}%</span>
               </div>
               <div className="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                <div className="w-[78%] h-full bg-primary rounded-full"></div>
+                <div className="w-[78%] h-full bg-primary rounded-full" style={{ width: `${Math.min(100, (stats.totalSizeGB / 100) * 100)}%` }}></div>
               </div>
-              <p className="text-[10px] text-outline mt-2">16 TB 中已使用 12.4 TB</p>
+              <p className="text-[10px] text-outline mt-2">100 GB 中已使用 {stats.totalSizeGB.toFixed(1)} GB</p>
             </div>
           </div>
           <div className="bg-surface-container-high/40 p-5 rounded-xl border-none">
@@ -291,7 +367,9 @@ export const DataDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </>
+    )}
+  </div>
+</div>
+);
 };

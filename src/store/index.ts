@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { VideoAsset } from '../mock/data';
+import { assetService } from '../services/assetService';
 
 /**
  * 全局状态管理 (Zustand)
@@ -16,6 +18,12 @@ export interface FieldPreferences {
 }
 
 interface AppState {
+  // 素材列表
+  assets: VideoAsset[];
+  isLoading: boolean;
+  fetchAssets: () => Promise<void>;
+  updateAsset: (id: string, updates: Partial<VideoAsset>) => Promise<void>;
+  
   // 当前激活的标签页: 素材管理 (assets) 或 数据看板 (dashboard)
   activeTab: 'assets' | 'dashboard';
   setActiveTab: (tab: 'assets' | 'dashboard') => void;
@@ -29,7 +37,30 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      assets: [],
+      isLoading: false,
+      fetchAssets: async () => {
+        set({ isLoading: true });
+        try {
+          const assets = await assetService.getAssets();
+          set({ assets, isLoading: false });
+        } catch (error) {
+          console.error('Failed to fetch assets:', error);
+          set({ isLoading: false });
+        }
+      },
+      updateAsset: async (id, updates) => {
+        try {
+          const updated = await assetService.updateAsset(id, updates);
+          set((state) => ({
+            assets: state.assets.map((a) => (a.id === id ? updated : a)),
+          }));
+        } catch (error) {
+          console.error('Failed to update asset:', error);
+          throw error;
+        }
+      },
       activeTab: 'assets',
       setActiveTab: (tab) => set({ activeTab: tab }),
       searchQuery: '',

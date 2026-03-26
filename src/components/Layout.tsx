@@ -9,6 +9,12 @@ const MAIN_TABS = [
   { id: 'dashboard', headerLabel: '数据看板', sideLabel: '分析', icon: BarChart2 },
 ] as const;
 
+const TOOLBAR_ITEMS = [
+  { id: 'notifications', icon: Bell, hasBadge: true, hideOnMobile: true },
+  { id: 'help', icon: HelpCircle, hideOnMobile: true },
+  { id: 'settings', icon: Settings, hideOnMobile: false },
+] as const;
+
 /**
  * 核心布局组件
  * 包含顶部导航栏、侧边栏以及主内容区域。
@@ -67,16 +73,22 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         {/* 右侧工具栏 */}
         <div className="flex items-center gap-1 md:gap-3">
-          <button onClick={handleNotImplemented} className="hidden sm:block p-2 hover:bg-slate-50 rounded-full transition-colors relative">
-            <Bell className="text-on-surface-variant w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
-          </button>
-          <button onClick={handleNotImplemented} className="hidden sm:block p-2 hover:bg-slate-50 rounded-full transition-colors">
-            <HelpCircle className="text-on-surface-variant w-5 h-5" />
-          </button>
-          <button onClick={handleNotImplemented} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
-            <Settings className="text-on-surface-variant w-5 h-5" />
-          </button>
+          {TOOLBAR_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button 
+                key={item.id}
+                onClick={handleNotImplemented} 
+                className={clsx(
+                  "p-2 hover:bg-slate-50 rounded-full transition-colors relative",
+                  item.hideOnMobile && "hidden sm:block"
+                )}
+              >
+                <Icon className="text-on-surface-variant w-5 h-5" />
+                {'hasBadge' in item && item.hasBadge && <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>}
+              </button>
+            );
+          })}
           <button onClick={handleNotImplemented} className="ml-1 md:ml-2 w-8 h-8 rounded-full bg-primary-fixed overflow-hidden border border-outline-variant flex items-center justify-center cursor-pointer">
             <User className="w-5 h-5 text-primary" />
           </button>

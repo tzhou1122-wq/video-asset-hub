@@ -63,7 +63,6 @@
 | **图标库** | **Lucide React** | 现代、简洁且一致的开源图标库。支持按需引入，体积小巧，与 Tailwind CSS 配合使用能轻松实现图标的颜色和大小定制。 |
 | **数据可视化** | **ECharts (echarts-for-react)** | 百度开源的工业级图表库。对于 Part B 中要求的“双Y轴混合图”及“下钻交互”，ECharts 提供了极高的定制化能力和优秀的渲染性能。 |
 | **状态管理** | **Zustand** | 极其轻量且无样板代码的状态管理库。官方自带 `persist` 中间件，一行代码即可实现“字段裁剪偏好持久化至 localStorage”，非常适合处理跨组件的 UI 状态和用户偏好。 |
-| **网络与 Mock**| **MSW (Mock Service Worker)**| 在 Service Worker 层拦截请求，可以在浏览器 Network 面板看到真实的请求记录，是最贴近真实业务的本地联调方案。 |
 
 ---
 
@@ -98,12 +97,22 @@ export interface FilterBarProps {
 ### 4.2 排序组件：`SortControl`
 独立的纯 UI 组件，接收 `currentField` 和 `order` ('asc' | 'desc')，通过点击触发 `onSortChange` 回调，由外层页面级组件统筹发起状态更新和 API 请求。
 
-### 4.3 详情抽屉与字段裁剪器：`AssetDrawer` & `FieldSelector`
-*   **AssetDrawer**: 接收 `visible`, `assetId`, `onClose`。内部维护视频播放器、可编辑的标签组件和详情描述列表。
-*   **FieldSelector**:
-    *   读取由 Zustand 管理的全局状态 `useFieldPreferencesStore`。
-    *   UI 呈现为 `Dropdown` 嵌套 `Checkbox.Group`，节省空间。
-    *   勾选变化时，调用 Store 的更新方法，Zustand 底层的 persist 会自动将其同步覆写到浏览器的 localStorage 中。
+### 4.3 详情抽屉：`AssetDrawer`
+接收 `visible`, `asset`, `onClose`, `onUpdateAsset`。内部集成 `VideoPlayer`、可编辑的标签组件和详情描述列表。通过 `onUpdateAsset` 回调实现数据的局部更新。
+
+### 4.4 原子展示组件：`AssetCard` & `AssetTable`
+*   **AssetCard**: 封装卡片视图的复杂样式，包括 Hover 预览占位、状态标签颜色映射、图片裁剪等。
+*   **AssetTable**: 封装表格视图的渲染逻辑，统一处理状态列的样式和操作项。
+*   **设计优点**: 减少主页面（AssetManagement）的代码量，提高渲染性能（配合 React.memo），并为未来的“悬浮预览”或“懒加载”提供独立的逻辑空间。
+
+### 4.5 视频播放器封装：`VideoPlayer`
+*   **功能**: 集中处理视频播放、暂停、错误捕获（Error Boundary）以及 UI 覆盖层。
+*   **演进**: 预留了动态签名 URL (Signed URL) 刷新逻辑的接口，确保素材访问的安全性。
+
+### 4.6 字段裁剪器：`FieldSelector`
+*   读取由 Zustand 管理的全局状态 `useAppStore`。
+*   UI 呈现为 `Dropdown` 嵌套 `Checkbox.Group`，节省空间。
+*   勾选变化时，调用 Store 的更新方法，Zustand 底层的 persist 会自动将其同步覆写到浏览器的 localStorage 中。
 
 ---
 
@@ -150,31 +159,27 @@ export interface VideoAsset {
     1.  **角色定义与权限划分**：
         *   **管理员 (Admin)**：拥有最高权限。可查看所有素材，可对任何素材进行“审核通过/驳回”、修改标签、删除素材以及分配用户角色。
         *   **剪辑师/运营 (Editor)**：拥有协作权限。可查看所有素材，可对素材的“标签”进行二次编辑和补充，可下载源文件，但无权进行审核或删除他人素材。
-        *   **普通浏览者 (Viewer)**：拥有只读权限。仅能浏览素材列表、查看详情和播放 Web 版视频，无法编辑标签、无法审核、无法下载高保真源文件。
+        *   **普通浏览者 (Viewer)**：拥有只读权限。仅能浏览素材列表、查看详情 and 播放 Web 版视频，无法编辑标签、无法审核、无法下载高保真源文件。
     2.  **前端实现方案**：
         *   **路由级鉴权**：在 React Router 中封装 `<PrivateRoute>`，非授权角色访问特定页面时重定向至 403 页面。
         *   **组件/按钮级鉴权**：封装一个 `<AuthWrapper allowedRoles={['Admin', 'Editor']}>` 组件。前端解析登录后获取的 JWT Token 中的 `role` 字段，若当前角色不在允许列表中，则隐藏或禁用对应的操作按钮（如“编辑标签”按钮对 Viewer 隐藏）。
     3.  **后端实现方案**：API 网关或路由层增加鉴权中间件，校验请求头中的 Token 角色，防止越权 API 调用（如 Viewer 伪造请求修改标签）。
 
-### 6.3 FilterBar 组件的进阶演进
-*   **局限性**：静态选项无法应对海量数据与动态联动。目前 Schema 中的 options 往往是硬编码的静态数组。
-*   **产品级演进方案**：在 Schema 定义中引入异步机制 `request: (currentValues) => Promise<Options[]>`，支持将 `type: 'select'` 扩展为 `type: 'remote-select'`（用于数千个上传人的模糊搜索）；并引入 `dependencies` 字段实现省市区等表单项的级联请求。
-
-### 6.4 海量数据请求与渲染优化 (Data Fetching & Rendering)
+### 6.3 海量数据请求与渲染优化 (Data Fetching & Rendering)
 *   **局限性**：在前后端联调中，如果后端一次性返回大量数据（如 10000 条视频记录），会导致：1) 网络传输耗时长，TTFB（首字节时间）显著增加；2) 浏览器解析巨型 JSON 阻塞主线程；3) 内存占用飙升；4) 渲染海量 DOM 导致页面直接卡死。
 *   **产品级演进方案**：
     1.  **服务端分页 (Server-side Pagination)**：废弃全量拉取，后端必须支持分页。对于视频流这种高频更新的场景，推荐使用 **游标分页 (Cursor-based Pagination)** 替代传统的 `offset/limit`，以避免数据频繁插入导致的列表偏移和重复加载问题。
     2.  **按需加载与虚拟列表结合**：前端不应一次性渲染所有数据。采用“无限滚动 (Infinite Scroll)”结合“虚拟列表 (Virtual Scrolling)”。只渲染可视区域内的 DOM 节点，并在滚动触底前预加载下一页数据，确保无论加载多少页，DOM 节点数量始终保持在极低水平。
     3.  **请求防抖与取消 (Request Cancellation)**：在频繁切换 `FilterBar` 条件时，使用 `AbortController` 取消过期的 API 请求，避免竞态条件 (Race Condition) 和无谓的网络消耗。
 
-### 6.5 媒体资源分发与体验优化 (Media Delivery & UX)
+### 6.4 媒体资源分发与体验优化 (Media Delivery & UX)
 *   **局限性**：视频封面图体积过大、加载缓慢，且静态封面无法提供足够的内容预览信息。
 *   **产品级演进方案**：
     1.  **封面图动态裁剪与格式优化**：图片采用 WebP 或 AVIF 格式，结合 CDN 动态裁剪能力（如 `?x-oss-process=image/resize,w_300`），根据终端屏幕大小请求合适尺寸的图片；列表封面强制开启**懒加载 (Lazy Load)**。
     2.  **视频预览交互 (Hover Preview)**：参考 YouTube 的交互体验，当鼠标悬浮在视频封面上时，自动静音播放低码率的预览片段，或使用雪碧图 (Sprite Sheet) 快速轮播，极大提升用户寻找素材的效率。
     3.  **防盗链与安全访问**：企业级素材通常属于商业机密，视频与图片 URL 应采用**动态签名 (Signed URL)**，设置极短的有效期，结合 Referer/IP 校验，防止素材被恶意盗刷。
 
-### 6.6 性能与大文件上传优化
+### 6.5 性能与大文件上传优化
 *   **局限性**：未考虑大体积视频上传的稳定性与安全性，以及前端对文件合法性的预判。
 *   **产品级演进方案**：
     1.  **前端预检查 (Pre-check) 机制**：与其被动等待报错，不如让前端更“聪明”。
@@ -183,9 +188,13 @@ export interface VideoAsset {
     2.  **大文件上传**：实现分片上传（Chunked Upload）与断点续传机制，结合 Web Worker 计算文件 MD5 实现“秒传”功能，提升大文件上传的成功率与用户体验。
     3.  **安全防护**：为预览视频增加动态水印（包含查阅者工号、时间戳），防止内部敏感素材被恶意录屏泄露。
 
-### 6.7 数据可视化看板的下钻分析 (Drill-down Analysis)
+### 6.6 数据可视化看板的下钻分析 (Drill-down Analysis)
 *   **局限性**：当前 Demo 仅展示了宏观的统计数据（如各状态的总数），管理者无法直接通过图表定位到具体的业务瓶颈（如哪个团队积压了最多待审核素材）。
 *   **产品级演进方案**：引入图表联动与下钻分析机制。
     1.  **交互式下钻**：点击某状态卡片（如“待审核”），下方动态展开更为详细的统计子图表（如柱状图或饼图）。
     2.  **多维度拆解**：支持按照**人员、团队或地区**展示该状态下的详细数据分布。
     3.  **数据模型支持**：在素材模型中扩展 `team`（所属团队）、`region`（所属大区）等业务字段，为多维分析提供数据支撑。
+
+### 6.7 网络与 Mock 方案演进
+*   **局限性**：目前采用简单的内存 Mock 或静态数据，无法在浏览器 Network 面板看到真实的请求记录。
+*   **产品级演进方案**：引入 **MSW (Mock Service Worker)**。在 Service Worker 层拦截请求，可以在浏览器 Network 面板看到真实的请求记录，是最贴近真实业务的本地联调方案。
