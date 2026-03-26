@@ -4,8 +4,9 @@ import { AssetDrawer } from '../components/AssetDrawer';
 import { SortControl, SortField, SortOrder } from '../components/SortControl';
 import { AssetCard } from '../components/AssetCard';
 import { AssetTable } from '../components/AssetTable';
+import { Pagination } from '../components/Pagination';
 import { mockAssets, VideoAsset } from '../mock/data';
-import { User, CheckCircle, Tag, MapPin, LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import { User, CheckCircle, Tag, MapPin, LayoutGrid, List } from 'lucide-react';
 import { useAppStore } from '../store';
 import { formatBytes, formatDuration } from '../utils/format';
 import clsx from 'clsx';
@@ -197,57 +198,14 @@ export const AssetManagement: React.FC = () => {
         />
       )}
 
-      <div className="flex flex-col sm:flex-row items-center justify-between bg-white px-6 py-4 rounded-xl shadow-sm border border-slate-200 gap-4">
-        <div className="text-xs text-on-surface-variant font-medium">
-          第 {filteredAssets.length === 0 ? 0 : startIndex + 1} 到 {endIndex} 条，共 {filteredAssets.length} 条素材
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          
-          <div className="flex items-center gap-1 overflow-x-auto max-w-[200px] sm:max-w-none py-1">
-            {Array.from({ length: totalPages }).map((_, idx) => {
-              const page = idx + 1;
-              if (totalPages > 5) {
-                if (page !== 1 && page !== totalPages && Math.abs(page - currentPage) > 1) {
-                  if (page === 2 || page === totalPages - 1) {
-                    return <div key={page} className="px-1 text-slate-400 text-xs">•••</div>;
-                  }
-                  return null;
-                }
-              }
-              
-              return (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={clsx(
-                    "w-8 h-8 shrink-0 flex items-center justify-center rounded border text-xs transition-all",
-                    currentPage === page
-                      ? "border-primary bg-primary text-white font-bold shadow-sm"
-                      : "border-slate-200 text-slate-600 font-medium hover:border-primary hover:text-primary"
-                  )}
-                >
-                  {page}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-all"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalItems={filteredAssets.length}
+        startIndex={startIndex}
+        endIndex={endIndex}
+      />
 
       <AssetDrawer
         visible={!!selectedAsset}

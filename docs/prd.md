@@ -114,6 +114,10 @@ export interface FilterBarProps {
 *   UI 呈现为 `Dropdown` 嵌套 `Checkbox.Group`，节省空间。
 *   勾选变化时，调用 Store 的更新方法，Zustand 底层的 persist 会自动将其同步覆写到浏览器的 localStorage 中。
 
+### 4.7 分页组件：`Pagination`
+*   **功能**: 封装分页逻辑，包括页码跳转、上一页/下一页、以及当前展示范围的文案提示。
+*   **设计优点**: 保持主页面逻辑清晰，且方便在其他列表页面（如“回收站”）复用。
+
 ---
 
 ## 五、 Mock 数据结构契约 (Data Model)
