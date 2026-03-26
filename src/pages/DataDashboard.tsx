@@ -120,10 +120,10 @@ export const DataDashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-8">
       <section>
         <div className="mb-6">
-          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mb-1">全局数据洞察</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-on-surface mb-1">全局数据洞察</h1>
           <p className="text-on-surface-variant text-sm">实时素材分布与运营效率指标。</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:bg-primary-fixed/30 transition-colors duration-300">
             <div>
               <p className="text-xs font-semibold text-outline uppercase tracking-wider mb-2">素材总量</p>

@@ -12,12 +12,19 @@ interface AssetDrawerProps {
   onClose: () => void;
 }
 
+/**
+ * 素材详情抽屉组件
+ * 展示视频预览、元数据详情，并允许用户配置展示字段。
+ */
 export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClose }) => {
   const { fieldPreferences, toggleFieldPreference } = useAppStore();
+  // 视频播放状态
   const [isPlaying, setIsPlaying] = useState(false);
+  // 字段配置下拉菜单状态
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // 点击外部关闭下拉菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -29,6 +36,7 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 抽屉关闭时停止播放
   useEffect(() => {
     if (!visible) {
       setIsPlaying(false);
@@ -39,12 +47,12 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
 
   return (
     <>
-      {/* Scrim */}
+      {/* 背景遮罩 (Scrim) */}
       <div className="fixed inset-0 bg-on-background/10 z-[60] backdrop-blur-[2px]" onClick={onClose}></div>
 
-      {/* Drawer */}
+      {/* 抽屉主体 */}
       <aside className="fixed right-0 top-0 h-screen w-full max-w-md lg:max-w-lg glass-panel z-[70] shadow-[0_0_50px_rgba(0,0,0,0.1)] flex flex-col border-l border-white/20 transform transition-transform duration-300 ease-in-out">
-        {/* Header */}
+        {/* 头部区域：包含关闭按钮和字段配置入口 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
           <div className="flex items-center gap-3">
             <button onClick={onClose} className="p-2 hover:bg-surface-container-high rounded-full transition-all">
@@ -56,6 +64,8 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
             <button className="p-2 hover:bg-surface-container-high rounded-lg text-primary transition-all">
               <Share2 className="w-5 h-5" />
             </button>
+            
+            {/* 字段配置下拉菜单 (Field Selector) */}
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -112,9 +122,9 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
           </div>
         </div>
 
-        {/* Content */}
+        {/* 内容区域 */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
-          {/* Video Player Mock */}
+          {/* 视频播放器区域 */}
           <section className="relative aspect-video bg-black rounded-xl overflow-hidden group shadow-lg">
             {isPlaying ? (
               <video 
@@ -142,7 +152,7 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
             )}
           </section>
 
-          {/* Metadata */}
+          {/* 元数据展示区域：根据用户偏好动态显示字段 */}
           <section>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant/70">基本信息</h3>
@@ -217,7 +227,7 @@ export const AssetDrawer: React.FC<AssetDrawerProps> = ({ visible, asset, onClos
           </section>
         </div>
 
-        {/* Footer */}
+        {/* 底部操作栏 */}
         <div className="px-6 py-4 bg-white/50 backdrop-blur-md border-t border-outline-variant/10 flex items-center justify-between">
           <div className="flex items-center gap-2 text-tertiary">
             <CloudCheck className="w-4 h-4" />

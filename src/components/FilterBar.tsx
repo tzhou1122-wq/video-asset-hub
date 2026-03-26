@@ -17,15 +17,23 @@ export interface FilterBarProps {
   onReset: () => void;
 }
 
+/**
+ * 过滤栏组件 (配置驱动)
+ * 根据传入的 schema 动态渲染过滤控件（下拉框、输入框等）。
+ * 这种设计模式使得新增过滤项只需修改配置，无需改动组件代码。
+ */
 export const FilterBar: React.FC<FilterBarProps> = ({ schema, value, onChange }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
       {schema.map((item) => (
         <div key={item.key} className="space-y-2">
+          {/* 控件标签与图标 */}
           <label className="text-[13px] font-bold text-gray-500 flex items-center gap-1">
             {item.icon}
             {item.label}
           </label>
+          
+          {/* 根据类型渲染对应的 Ant Design 控件 */}
           {item.type === 'select' && (
             <Select
               className="w-full"

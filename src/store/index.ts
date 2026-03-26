@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+/**
+ * 全局状态管理 (Zustand)
+ * 处理应用的主题切换、搜索查询以及用户对视频详情字段的展示偏好。
+ */
 export interface FieldPreferences {
   title: boolean;
   uploader: boolean;
@@ -12,10 +16,13 @@ export interface FieldPreferences {
 }
 
 interface AppState {
+  // 当前激活的标签页: 素材管理 (assets) 或 数据看板 (dashboard)
   activeTab: 'assets' | 'dashboard';
   setActiveTab: (tab: 'assets' | 'dashboard') => void;
+  // 全局搜索关键词
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  // 详情页字段显示偏好 (持久化存储)
   fieldPreferences: FieldPreferences;
   toggleFieldPreference: (field: keyof FieldPreferences) => void;
 }
@@ -46,6 +53,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'cinematic-ledger-storage',
+      // 仅持久化 fieldPreferences 字段到 localStorage
       partialize: (state) => ({ fieldPreferences: state.fieldPreferences }),
     }
   )
